@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estrategia de Cambio Docentes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#FBFAFD; --surface:#FFFFFF; --soft:#F4F0F8; --line:#E4E2EC; --grid:#EEECF3;
+  --ink:#303651; --ink2:#5B607A; --ink3:#8A8EA6; --violet:#503B96; --gold:#F8B716; --goldText:#8A6200;
+  --s-na:#8A8FA8; --s-a1:#503B96; --s-d:#B0457E; --s-k:#2C7A8C; --s-h:#C98A00; --s-r:#3D8A5C; --s-p:#303651; --s-c:#7A6CB0;
+  --ok:#3D8A5C; --miss:#C2453D;
+  --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:"Manrope", "Segoe UI", Arial, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#16182A; --surface:#1E2136; --soft:#262A44; --line:#33375A; --grid:#262A42;
+    --ink:#ECEBF5; --ink2:#B5B7CC; --ink3:#8487A3; --violet:#A895F0; --goldText:#F8B716;
+    --s-na:#9A9EB8; --s-a1:#9C88EE; --s-d:#E07BB0; --s-k:#5BB8CB; --s-h:#F2B53A; --s-r:#6CC38E; --s-p:#C9CCE3; --s-c:#B3A5F2;
+    --ok:#6CC38E; --miss:#F07A70;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#16182A; --surface:#1E2136; --soft:#262A44; --line:#33375A; --grid:#262A42;
+  --ink:#ECEBF5; --ink2:#B5B7CC; --ink3:#8487A3; --violet:#A895F0; --goldText:#F8B716;
+  --s-na:#9A9EB8; --s-a1:#9C88EE; --s-d:#E07BB0; --s-k:#5BB8CB; --s-h:#F2B53A; --s-r:#6CC38E; --s-p:#C9CCE3; --s-c:#B3A5F2;
+  --ok:#6CC38E; --miss:#F07A70;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{padding:28px 28px 4px}
+.wrap h1{font-size:clamp(24px,2.6vw,36px)}
+.wrap .toolbar{margin-top:14px}
+body.tight .act{font-size:11.5px;padding:6px 7px}
+body.tight .stage{padding:10px}
+body.tight .stage .nm{font-size:16px}
+body.tight .frtag{font-size:10.5px}
+body.tight .act .m .sg{display:none}
+@media (max-width:700px){.wrap{padding:24px 16px 4px}}
+.kicker{color:var(--ink2);font-size:14px;margin:0 0 10px}
+.kicker b{color:var(--violet)}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(28px,4vw,40px);line-height:1.12;margin:0}
+.lede{color:var(--ink2);margin:12px 0 0;max-width:70ch}
+.toolbar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center;margin:26px 0 0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink2);padding:6px 12px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink2);font-size:12.5px;align-items:center}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.scroller{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:4px 0 32px}
+.board{position:relative;margin:0 auto;padding:0 28px}
+#curve{position:absolute;left:28px;top:0;pointer-events:none}
+.cols{display:grid;gap:14px;position:relative}
+.col{display:flex;flex-direction:column}
+.head{height:var(--hh);position:relative}
+.stage{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--ink);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.stage .nm{font-family:var(--serif);font-weight:600;font-size:18px;line-height:1.2}
+.stage .q{color:var(--ink2);font-size:13px;margin-top:2px;min-height:2.6em}
+.stage .dt{color:var(--ink3);font-size:12px;margin-top:8px}
+.stage .row{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;font-size:12.5px;color:var(--ink2)}
+.stage .pct{font-family:var(--serif);font-weight:600;font-size:22px;color:var(--ink)}
+.stage .bar{display:flex;height:5px;border-radius:3px;overflow:hidden;background:var(--grid);margin-top:6px}
+.stage .bar i{display:block;height:100%}
+.stage .stg{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;min-height:44px;align-content:flex-start}
+.stage .stg span{font-size:11px;font-weight:700;color:var(--c);background:color-mix(in srgb,var(--c) 12%,transparent);padding:1px 7px;border-radius:4px;height:fit-content}
+.act .m .dot{width:8px;height:8px;border-radius:50%;flex:none}
+.act .m .sg{margin-left:auto}
+.acts{display:flex;flex-direction:column;gap:6px}
+.act{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--sc);border-radius:7px;padding:7px 9px;font-size:12.5px;line-height:1.3}
+.act.dim{display:none}
+.act .m{display:flex;gap:6px;align-items:center;color:var(--ink3);font-size:11.5px;font-weight:600;margin-bottom:2px}
+.act .m .late{color:var(--miss)}
+.act .t{color:var(--ink);font-weight:500}
+.frtag{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:11px;font-weight:700;padding:2px 8px 2px 6px;border-radius:999px;border:1px solid var(--line);color:var(--ink2);background:var(--soft)}
+.frtag.f-pat{color:var(--goldText);border-color:color-mix(in srgb,var(--gold) 55%,transparent);background:color-mix(in srgb,var(--gold) 14%,transparent)}
+.frtag.f-for{color:var(--ink);border-color:var(--ink3);background:transparent}
+.fr{display:inline-flex;align-items:center;gap:4px}
+.frs{display:flex;gap:10px;color:var(--ink2);font-weight:600}
+.chip svg{vertical-align:-2px;margin-right:5px}
+.legend .fr svg{color:var(--ink2)}
+.act.S{border-style:dashed;border-left-style:solid}
+.col.side .stage{background:var(--soft)}
+.cohort{display:inline-block;margin:10px 0 0;font-size:13px;font-weight:700;color:var(--violet);background:color-mix(in srgb,var(--violet) 10%,transparent);padding:3px 10px;border-radius:999px}
+.act.N{border-style:dashed;border-left-style:solid}
+.act.N .t{color:var(--ink2)}
+.none{color:var(--ink3);font-size:12.5px;padding:6px 2px}
+.phase{position:absolute;top:6px;font-size:11.5px;font-weight:700;color:var(--ink3)}
+footer{max-width:1240px;margin:0 auto;padding:0 28px 48px;color:var(--ink3);font-size:12.5px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Estrategia de Cambio Docentes</h1>
+  <div class="toolbar">
+    <div class="chips" role="group" aria-label="Filtrar por frente" id="filters"></div>
+  </div>
+</div>
+<div class="scroller"><div class="board" id="board"><svg id="curve" aria-hidden="true"></svg><div class="cols" id="cols"></div></div></div>
+
+<script>
+// [etapa, frente, fecha (real o plan), fechaFin, acción, nota]
+const RAW = [
+ ["a1","com","2026-07-31",null,"Email: Cómo la máquina de escribir cedió al computador, tu campus virtual está a punto de dar su próximo salto"],
+ ["a1","com","2026-08-03",null,"Email: Conoce una nueva dimensión en la excelencia formativa y las herramientas que te acompañarán"],
+ ["d","pat","2026-08-05",null,"Email de bienvenida / PreWelcome: invitación a la sesión de bienvenida"],
+ ["d","com","2026-08-07",null,"Email: El nuevo campus agiliza tu gestión y multiplica el impacto"],
+ ["d","for","2026-08-10",null,"Recordatorio: invitación a la sesión de bienvenida"],
+ ["k","for","2026-08-10",null,"Sesión de bienvenida en vivo, 6:00 p. m. (hora MX)"],
+ ["k","com","2026-08-11",null,"Email: Mi campus virtual también transforma la manera en que te conectas con tus estudiantes"],
+ ["k","for","2026-08-12",null,"Email: Puntos clave de la sesión de bienvenida – Grabación y recursos disponibles"],
+ ["k","com","2026-08-13",null,"Email: Guía de inicio y programación de la asignatura"],
+ ["a1","pat","2026-08-13",null,"Reunión con Eulalio para cerrar dudas y dar confianza a profesores, miércoles 6:00 p. m. (hora MX)"],
+ ["k","com","2026-08-14",null,"Email: Guía de acceso a Mi Campus Virtual"],
+ ["kh","for","2026-08-14","2026-08-31","Espacios sincrónicos de acompañamiento: viernes 4:00 a 5:00 p. m. y lunes 5:00 a 6:00 p. m. (hora MX), del 14 al 31 ago"],
+ ["h","com","2026-08-17",null,"Email: Lineamientos operativos para profesores – UP, Posgrados en línea"],
+ ["h","com","2026-08-19",null,"Email: Recupera el tiempo que lo administrativo le quitaba a tu labor docente"],
+ ["h","com","2026-08-24",null,"Email: Tu experiencia en Mi Campus Virtual nos importa (encuesta de adherencia SurveyMonkey)"],
+ ["h","com","2026-08-24",null,"Email: El campus virtual evolucionó. Descubre todo lo que ahora fortalece tu enseñanza"],
+ ["h","com","2026-08-25",null,"Email: Extensión de prórroga"],
+ ["h","com","2026-08-31",null,"Email: Tu experiencia en Mi Campus Virtual nos importa (encuesta de refuerzo SurveyMonkey)"],
+ ["r","com","2026-09-07",null,"Email: Domina el nuevo campus y potencia tu labor docente"],
+ ["r","com","2026-09-18",null,"Email: Ser parte de esta evolución refleja tu visión como docente"],
+ ["r","com","2026-09-18",null,"Email: Finalización de asignatura"],
+ ["r","com","2026-09-21",null,"Email: Agradecimiento"]
+];
+const ST = {
+ a1:{n:"Consciencia",c:"--s-a1"}, d:{n:"Deseo",c:"--s-d"}, k:{n:"Conocimiento",c:"--s-k"},
+ kh:{n:"Conocimiento y Habilidad",c:"--s-k"}, h:{n:"Habilidad",c:"--s-h"}, r:{n:"Refuerzo",c:"--s-r"}
+};
+const SORD=["a1","d","k","kh","h","r"];
+const FR = {
+ com:{n:"Comunicación", i:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M2 6.5v3h2.5L10 13V3L4.5 6.5H2z"/><path d="M12.5 5.5a3.5 3.5 0 0 1 0 5"/></svg>'},
+ pat:{n:"Patrocinio", i:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M8 1.8l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 11.6l-3.8 2 .7-4.3-3.1-3 4.3-.6z"/></svg>'},
+ for:{n:"Formación", i:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M1.5 6L8 3l6.5 3L8 9z"/><path d="M4.5 7.5v3.2c1 .9 2.2 1.3 3.5 1.3s2.5-.4 3.5-1.3V7.5"/><path d="M14.5 6v4"/></svg>'}
+};
+const FORD=["com","pat","for"];
+const MES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const DAY=864e5, T0=Date.UTC(2026,6,27); // lunes 27 jul
+const toD=s=>s?Date.UTC(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10)):null;
+const fmt=t=>{const d=new Date(t);return d.getUTCDate()+" "+MES[d.getUTCMonth()]};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const css=v=>`var(${v})`;
+const DATA = RAW.map(([s,f,d,e,t])=>{ const ref=toD(d); return {s,f,ref,end:toD(e),t,wk:Math.floor((ref-T0)/DAY/7)}; });
+const LASTW=Math.max(...DATA.map(d=>d.wk));
+const COLS=[...Array(LASTW+1).keys()].map(w=>({w,a:T0+w*7*DAY}));
+let cum=0;
+const stats=COLS.map(C=>{
+  const its=DATA.filter(d=>d.wk===C.w).sort((a,b)=>a.ref-b.ref||SORD.indexOf(a.s)-SORD.indexOf(b.s));
+  cum+=its.length;
+  return {...C,its,cum,stages:SORD.filter(k=>its.some(d=>d.s===k)),fr:FORD.map(k=>[k,its.filter(d=>d.f===k).length]).filter(x=>x[1])};
+});
+let COLW=186, GAP=8, HH=150, n=COLS.length, W=n*COLW+(n-1)*GAP;
+const board=document.getElementById("board"), cols=document.getElementById("cols"), svg=document.getElementById("curve");
+function layout(){
+  const pad = innerWidth < 700 ? 32 : 56;
+  const avail = document.documentElement.clientWidth - pad;
+  COLW = Math.max(120, Math.floor((avail-(n-1)*GAP)/n));
+  W = n*COLW+(n-1)*GAP;
+  board.style.width=(W+pad)+"px";
+  board.style.padding=`0 ${pad/2}px`;
+  svg.style.left=(pad/2)+"px";
+  cols.style.gridTemplateColumns=`repeat(${n},${COLW}px)`; cols.style.gap=GAP+"px";
+  cols.style.setProperty("--hh",HH+"px");
+  document.body.classList.toggle("tight", COLW < 160);
+}
+layout();
+let rz; addEventListener("resize",()=>{ clearTimeout(rz); rz=setTimeout(()=>{ layout(); render(); },120); });
+
+let filter="all";
+const pass=d=>filter==="all"||d.f===filter;
+const fb=document.getElementById("filters");
+[["all","Todos los frentes"],...FORD.map(k=>[k,FR[k].n])]
+  .forEach(([k,l])=>fb.insertAdjacentHTML("beforeend",`<button class="chip" data-f="${k}" aria-pressed="${k==="all"}">${k!=="all"?FR[k].i:""}${l}</button>`));
+fb.addEventListener("click",e=>{const b=e.target.closest(".chip"); if(!b)return; filter=b.dataset.f;
+  fb.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c===b)); render();});
+
+function render(){
+  cols.innerHTML = stats.map((x,i)=>{
+    const shown=x.its.filter(pass);
+    return `<div class="col">
+      <div class="head"></div>
+      <div class="stage">
+        <div class="nm">Semana ${i+1}</div>
+        <div class="dt" style="margin-top:2px">${fmt(x.a)} al ${fmt(x.a+6*DAY)}</div>
+        <div class="stg">${x.stages.map(k=>`<span style="--c:${css(ST[k].c)}">${ST[k].n}</span>`).join("")}</div>
+        <div class="row"><span class="pct">${x.its.length||"—"}</span><span class="frs">${x.its.length?x.fr.map(([k,c])=>`<span class="fr" title="${FR[k].n}">${FR[k].i}${c}</span>`).join(""):"Sin acciones"}</span></div>
+      </div>
+      <div class="acts">${shown.length?shown.map(d=>{
+        const S=ST[d.s], F=FR[d.f];
+        const when=d.end?fmt(d.ref)+"–"+fmt(d.end):fmt(d.ref);
+        return `<div class="act" style="--sc:${css(S.c)}">
+          <div class="m"><span>${when}</span><span class="sg" style="color:${css(S.c)}">${S.n}</span></div>
+          <div class="t">${esc(d.t)}</div>
+          <div class="frtag f-${d.f}">${F.i}${F.n}</div>
+        </div>`;}).join(""):`<div class="none">${x.its.length?"Sin acciones de este frente.":"—"}</div>`}</div>
+    </div>`;}).join("");
+  drawCurve();
+}
+function drawCurve(){
+  svg.setAttribute("width",W); svg.setAttribute("height",HH); svg.setAttribute("viewBox",`0 0 ${W} ${HH}`);
+  const TOPY=42, BOT=HH-28, MAX=stats[LASTW].cum;
+  const X=i=>i*(COLW+GAP)+COLW/2, Y=v=>BOT-(v/MAX)*(BOT-TOPY);
+  let d=`M ${X(0)-COLW/2} ${BOT}`, q={x:X(0)-COLW/2,y:BOT};
+  stats.forEach((x,i)=>{ const p={x:X(i),y:Y(x.cum)}, mx=(q.x+p.x)/2; d+=` C ${mx} ${q.y}, ${mx} ${p.y}, ${p.x} ${p.y}`; q=p; });
+  d+=` L ${W-6} ${q.y}`;
+  let g=`<line x1="0" y1="${BOT}" x2="${W}" y2="${BOT}" stroke="${css("--grid")}"/>`;
+  g+=`<path d="${d}" fill="none" stroke="${css("--line")}" stroke-width="10" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${css("--ink")}" stroke-width="2"/>`;
+  g+=`<path d="M ${W-12} ${q.y-6} L ${W-2} ${q.y} L ${W-12} ${q.y+6} Z" fill="${css("--ink")}"/>`;
+    [[Date.UTC(2026,7,1),"Agosto"],[Date.UTC(2026,8,1),"Septiembre"]].forEach(([t,m])=>{
+    const w=Math.floor((t-T0)/DAY/7), frac=((t-T0)/DAY-w*7)/7, x=w*(COLW+GAP)+frac*COLW;
+    g+=`<line x1="${x}" y1="22" x2="${x}" y2="${HH}" stroke="${css("--line")}" stroke-dasharray="4 4"/>`;
+    g+=`<text x="${x+6}" y="${HH-8}" font-family="Manrope,Arial,sans-serif" font-size="12" font-weight="700" fill="${css("--violet")}">${m}</text>`;
+  });
+  g+=`<text x="4" y="${HH-8}" font-family="Manrope,Arial,sans-serif" font-size="12" font-weight="700" fill="${css("--violet")}">Julio</text>`;
+  stats.forEach((x,i)=>{
+    if(!x.its.length){ g+=`<circle cx="${X(i)}" cy="${Y(x.cum)}" r="4" fill="${css("--surface")}" stroke="${css("--ink3")}" stroke-width="1.5"/>`; return; }
+    const cy=Y(x.cum);
+    g+=`<circle cx="${X(i)}" cy="${cy}" r="24" fill="${css("--bg")}"/>`;
+    g+=`<circle cx="${X(i)}" cy="${cy}" r="18" fill="${css("--surface")}" stroke="${css("--ink")}" stroke-width="2"/>`;
+    g+=`<text x="${X(i)}" y="${cy+5}" text-anchor="middle" font-family="'Source Serif 4',Georgia,serif" font-size="14" font-weight="600" fill="${css("--ink")}">${x.cum}</text>`;
+  });
+  svg.innerHTML=g;
+}
+render();
+</script>
+</body>
+</html>
